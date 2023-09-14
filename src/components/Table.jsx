@@ -63,12 +63,13 @@ function Table({showCreate}) {
     }
 
     const deleteUser = async (id) => {
+        console.log(id)
         try {
             setLoding(true);
-            
             const response = await axios.delete(`https://jsd5-mock-backend.onrender.com/member/${id}`);
             setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
             console.log("Delete success!!", response);
+            
         } catch (error) {
             setError("Something went wrong! Can't delete data", error);
         } finally {
@@ -115,7 +116,7 @@ function Table({showCreate}) {
                                     {item?.position}
                                 </td>
                                 <td className="px-6 py-4" hidden={display}>
-                                    <button className='bg-gray-300 text-black px-2 rounded' onClick={()=>deleteUser()}>Delete</button>
+                                    <button className='bg-gray-300 text-black px-2 rounded' onClick={()=>deleteUser(item.id)}>Delete</button>
                                 </td>
                             </tr>
                         )
