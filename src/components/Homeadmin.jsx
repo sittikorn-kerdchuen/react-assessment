@@ -6,7 +6,7 @@ import Table from './Table'
 // import Create from './Create'
 
 function Homeadmin() {
-  const [showCreate,setShowCreate] = useState(false)
+  const [showItem,setShowItem] = useState(false)
 
   return (
     <div>
@@ -17,7 +17,7 @@ function Homeadmin() {
       </div>
       <Linked />
       {/* <Create/> */}
-      <Table showCreate={showCreate} />
+      <Table showItem={showItem} />
     </div>
   )
 }

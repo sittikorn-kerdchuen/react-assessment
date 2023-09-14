@@ -3,15 +3,16 @@ import React, { useState, useEffect } from 'react'
 import ReactLoading from 'react-loading'
 // components
 import Create from './Create'
+import Update from './Update'
 
 
 
-function Table({ showCreate }) {
+function Table({ showItem }) {
 
     const [users, setUsers] = useState([])
     const [loding, setLoding] = useState(false)
     const [error, setError] = useState("")
-    const display = (showCreate === undefined ? true : false) //set show element some elememt
+    const display = (showItem === undefined ? !showItem : showItem) //set show element some elememt
 
     // Set show items 5 items/page
     const [currentPage, setCurrentPage] = useState(1)
@@ -20,7 +21,7 @@ function Table({ showCreate }) {
     const endPage = startPage + itemsPage;
     const displayUserTable = users.slice(startPage, endPage);
 
-    // Set pagecontrol
+    // Set page control
     const totalPages = Math.ceil(users.length / itemsPage);
     const handlePageChange = (newPage) => {
         setCurrentPage(newPage);
@@ -59,40 +60,32 @@ function Table({ showCreate }) {
             const response = await axios.post(`https://jsd5-mock-backend.onrender.com/members`, requestData);
             console.log(response)
 
-
         } catch (error) {
             setError("Someting went wrong! can't create data", error)
         } finally {
-            const showAlert = () => {
-                return (
-                    <div className="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
-                        <span className="font-medium">Create success!</span> `${name} ${lastname} ${position} is created`
-                    </div>
-                )
-            }
+
             setLoding(false)
-            showAlert()
         }
-        
+
     }
 
-    // const updateUser = async (id, name, lastname, position) => {
-    //     try {
-    //         setLoding(true);
-    //         const requestData = {
-    //             name: name,
-    //             lastname: lastname,
-    //             position: position,
-    //         };
-    //         const response = await axios.put(`https://jsd5-mock-backend.onrender.com/members/${id}`, requestData);
-    //         console.log(response);
-    //         // Handle the successful update response here
-    //     } catch (error) {
-    //         setError("Something went wrong! Can't update data", error);
-    //     } finally {
-    //         setLoding(false);
-    //     }
-    // };
+    const updateUser = async (id, name, lastname, position) => {
+        try {
+            setLoding(true);
+            const requestData = {
+                name: name,
+                lastname: lastname,
+                position: position,
+            };
+            const response = await axios.put(`https://jsd5-mock-backend.onrender.com/members/${id}`, requestData);
+            console.log(response);
+            // Handle the successful update response here
+        } catch (error) {
+            setError("Something went wrong! Can't update data", error);
+        } finally {
+            setLoding(false);
+        }
+    };
 
 
     const deleteUser = async (id) => {
@@ -130,7 +123,7 @@ function Table({ showCreate }) {
                                     Position
                                 </th>
 
-                                <th scope="col" className="px-6 py-3" hidden={display}>
+                                <th scope="col" className={`${display?`hidden`:'px-6 py-3'}`}>
                                     Action
                                 </th>
                             </tr>
@@ -148,9 +141,9 @@ function Table({ showCreate }) {
                                         <td className="px-6 py-4">
                                             {item?.position}
                                         </td>
-                                        <td className="px-6 py-4 flex gap-2" hidden={display}>
-                                            {/* <button className='bg-yellow-500 text-black px-2 rounded' onClick={() => updateUser(item.id,item.name, item.lastname, item.position)}>Update</button> */}
-                                            <button className='bg-red-500 text-white px-2 rounded' onClick={() => deleteUser(item.id)}>Delete</button>
+                                        <td className={`${display?`hiden p-0`:`py-4 flex mx-5`}`}  >
+                                            {/* <button className='bg-yellow-500 text-black px-2 rounded' onClick={() => <Update updateUser={updateUser} />} hidden={display}>Update</button> */}
+                                            <button className='bg-red-500 text-white px-2 rounded' onClick={() => deleteUser(item.id)} hidden={display}>Delete</button>
                                         </td>
                                     </tr>
                                 )
@@ -159,8 +152,7 @@ function Table({ showCreate }) {
                         </tbody>
                     </table>
                     <div>
-                        {/* ... your other components ... */}
-                        <div className="mt-4 flex justify-center">
+                        <div className="mt-4  justify-center grid-flow-row px-5">
                             {Array.from({ length: totalPages }, (_, index) => (
                                 <button
                                     key={index}
@@ -178,6 +170,9 @@ function Table({ showCreate }) {
 
                 </div>}
 
+            {/* Modal */}
+
+           
 
         </div>
     )
