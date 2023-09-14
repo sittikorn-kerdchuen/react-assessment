@@ -6,13 +6,26 @@ import Create from './Create'
 
 
 
-function Table({showCreate}) {
+function Table({ showCreate }) {
 
     const [users, setUsers] = useState([])
     const [loding, setLoding] = useState(false)
     const [error, setError] = useState("")
-    const display = (showCreate === undefined? true:false)
-    
+    const display = (showCreate === undefined ? true : false) //set show element some elememt
+
+    // Set show items 5 items/page
+    const [currentPage, setCurrentPage] = useState(1)
+    const itemsPage = 5;
+    const startPage = (currentPage - 1) * itemsPage;
+    const endPage = startPage + itemsPage;
+    const displayUserTable = users.slice(startPage, endPage);
+
+    // Set pagecontrol
+    const totalPages = Math.ceil(users.length / itemsPage);
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage);
+    };
+
 
     useEffect(() => {
         let abortController = new AbortController()
@@ -32,7 +45,7 @@ function Table({showCreate}) {
         }
         loadData()
         return () => abortController.abort()
-    },[]);
+    }, []);
 
 
     const createUser = async (name, lastname, position) => {
@@ -45,7 +58,7 @@ function Table({showCreate}) {
             };
             const response = await axios.post(`https://jsd5-mock-backend.onrender.com/members`, requestData);
             console.log(response)
-            
+
 
         } catch (error) {
             setError("Someting went wrong! can't create data", error)
@@ -57,10 +70,30 @@ function Table({showCreate}) {
                     </div>
                 )
             }
-            showAlert()
             setLoding(false)
+            showAlert()
         }
+        
     }
+
+    // const updateUser = async (id, name, lastname, position) => {
+    //     try {
+    //         setLoding(true);
+    //         const requestData = {
+    //             name: name,
+    //             lastname: lastname,
+    //             position: position,
+    //         };
+    //         const response = await axios.put(`https://jsd5-mock-backend.onrender.com/members/${id}`, requestData);
+    //         console.log(response);
+    //         // Handle the successful update response here
+    //     } catch (error) {
+    //         setError("Something went wrong! Can't update data", error);
+    //     } finally {
+    //         setLoding(false);
+    //     }
+    // };
+
 
     const deleteUser = async (id) => {
         console.log(id)
@@ -69,64 +102,83 @@ function Table({showCreate}) {
             const response = await axios.delete(`https://jsd5-mock-backend.onrender.com/member/${id}`);
             setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
             console.log("Delete success!!", response);
-            
+
         } catch (error) {
             setError("Something went wrong! Can't delete data", error);
         } finally {
             setLoding(false);
         }
     };
-    
+
 
 
     return (
         <div>
-            {!display&& <Create createUser={createUser} />}
-            {loding? <ReactLoading type='bubbles' color='#333' height={'20%'} width={'20%'} className='text-center mx-auto' /> : 
-            <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-2/3 mx-auto my-10">
-            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                        <th scope="col" className="px-6 py-3">
-                            Name
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Lastname
-                        </th>
-                        <th scope="col" className="px-6 py-3">
-                            Position
-                        </th>
-
-                        <th scope="col" className="px-6 py-3" hidden={display}>
-                            Action
-                        </th>
-                    </tr>
-                </thead>
-                <tbody >
-                    {users.map((item, idx) => {
-                        return (
-                            <tr key={idx} className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
-                                <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    {item?.name}
+            {!display && <Create createUser={createUser} />}
+            {loding ? <ReactLoading type='bubbles' color='#333' height={'20%'} width={'20%'} className='text-center mx-auto' /> :
+                <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-2/3 mx-auto my-10">
+                    <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th scope="col" className="px-6 py-3">
+                                    Name
                                 </th>
-                                <td className="px-6 py-4">
-                                    {item?.lastname}
-                                </td>
-                                <td className="px-6 py-4">
-                                    {item?.position}
-                                </td>
-                                <td className="px-6 py-4" hidden={display}>
-                                    <button className='bg-gray-300 text-black px-2 rounded' onClick={()=>deleteUser(item.id)}>Delete</button>
-                                </td>
+                                <th scope="col" className="px-6 py-3">
+                                    Lastname
+                                </th>
+                                <th scope="col" className="px-6 py-3">
+                                    Position
+                                </th>
+
+                                <th scope="col" className="px-6 py-3" hidden={display}>
+                                    Action
+                                </th>
                             </tr>
-                        )
+                        </thead>
+                        <tbody >
+                            {displayUserTable.map((item, idx) => {
+                                return (
+                                    <tr key={idx} className="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+                                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            {item?.name}
+                                        </th>
+                                        <td className="px-6 py-4">
+                                            {item?.lastname}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {item?.position}
+                                        </td>
+                                        <td className="px-6 py-4 flex gap-2" hidden={display}>
+                                            {/* <button className='bg-yellow-500 text-black px-2 rounded' onClick={() => updateUser(item.id,item.name, item.lastname, item.position)}>Update</button> */}
+                                            <button className='bg-red-500 text-white px-2 rounded' onClick={() => deleteUser(item.id)}>Delete</button>
+                                        </td>
+                                    </tr>
+                                )
 
-                    })}
-                </tbody>
-            </table>
-        </div>}
+                            })}
+                        </tbody>
+                    </table>
+                    <div>
+                        {/* ... your other components ... */}
+                        <div className="mt-4 flex justify-center">
+                            {Array.from({ length: totalPages }, (_, index) => (
+                                <button
+                                    key={index}
+                                    className={`${currentPage === index + 1
+                                        ? 'bg-gray-600 text-white'
+                                        : 'bg-gray-300 text-black'
+                                        } px-3 py-1 mx-1 mb-3 rounded`}
+                                    onClick={() => handlePageChange(index + 1)}
+                                >
+                                    {index + 1}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
-            
+                </div>}
+
+
         </div>
     )
 }
